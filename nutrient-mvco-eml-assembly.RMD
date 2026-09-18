@@ -308,6 +308,7 @@ nutrients_updated <- nutrients_updated %>%
   mutate(iode_quality_flag_phosphate = ifelse(is.na(iode_quality_flag_phosphate), 2, iode_quality_flag_phosphate))
 
 nutrients <- nutrients_updated[order(nutrients_updated$datetime), ]
+nutrients <- rename(nutrients, date_time_utc = datetime) 
 
 ```
 
@@ -348,7 +349,7 @@ write.csv(high_ammonium, "high_ammonium.csv")
 
 ```{r}
 
-ggplot(data = nutrients, aes(x = date_time_utc, y = nitrate_nitrite)) + geom_point() +
+ggplot(data = nutrients, aes(x = date_time_utc, y = nitrate)) + geom_point() +
   xlab("date") + ylab("nitrate concentration (µmol/L)") +
   scale_x_date(date_breaks = "5 years", date_minor_breaks = "1 year", date_labels = "%Y") +
   theme_minimal()
@@ -373,7 +374,7 @@ ggplot(data = nutrients, aes(x = date_time_utc, y = silicate)) + geom_point() +
 ggsave("timeseries_point_silicate.png")
 
 # line plots
-ggplot(data = nutrients, aes(x = date_time_utc, y = nitrate_nitrite)) + geom_line() +
+ggplot(data = nutrients, aes(x = date_time_utc, y = nitrate)) + geom_line() +
   xlab("date") + ylab("nitrate concentration (µmol/L)") +
   scale_x_date(date_breaks = "5 years", date_minor_breaks = "1 year", date_labels = "%Y") +
   theme_minimal()
@@ -491,13 +492,13 @@ map_locs(southern_samples, colorvar = "ammonium", region = "transect")
 # plot high ammonium samples
 map_locs(high_ammonium, colorvar = "ammonium", region = "transect")
 
-new_data <- nutrients %>% filter(datetime > "2017-05-30 20:00:00")
+new_data <- nutrients %>% filter(date_time_utc > "2017-05-30 20:00:00")
 map_locs(new_data, colorvar = "ammonium", region = "transect")
 
-new_old_data <- nutrients %>% filter(datetime < "2006-04-19 21:10:00")
+new_old_data <- nutrients %>% filter(date_time_utc < "2006-04-19 21:10:00")
 map_locs(new_old_data, colorvar = "ammonium", region = "transect")
 
-version1  <- nutrients %>% filter("2006-04-19 21:10:00" < datetime & datetime < "2017-05-30 20:00:00")
+version1  <- nutrients %>% filter("2006-04-19 21:10:00" < date_time_utc & date_time_utc < "2017-05-30 20:00:00")
 map_locs(version1, colorvar = "ammonium", region = "transect")
 
 hist(nutrients$longitude, plot = FALSE)
@@ -532,9 +533,6 @@ nutrients <- nutrients %>%
 # nutr_pubd <- read_csv(tf, TRUE, show_col_types = FALSE)
 
 nutr_pubd <- read_csv("nes-lter-nutrient-mvco_v5.csv", TRUE, show_col_types = FALSE)
-
-nutrients <- nutrients %>%
-   rename(date_time_utc = datetime)
 
 comparison <- compare_df(nutrients, nutr_pubd, c("event_number", "depth"))
 
